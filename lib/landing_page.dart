@@ -23,7 +23,7 @@ class _LandingPageState extends State<LandingPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          backgroundColor: Color(0xFF283F61),
+          backgroundColor: const Color(0xFF283F61),
           leading: Builder(builder: (context) {
             return IconButton(
               icon: const Icon(Icons.menu, color: Colors.white), // Drawer icon
@@ -66,17 +66,15 @@ class _LandingPageState extends State<LandingPage> {
               ),
             ),
             ListTile(
-              title: Text('Profile Page'),
+              title: const Text('Profile Page'),
               onTap: () {
-                print('Navigating to Profile Page');
                 _updateBody(ProfileScreen());
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: Text('Enrollment Page'),
+              title: const Text('Enrollment Page'),
               onTap: () {
-                print('Navigating to Enrollment Page');
                 _updateBody(EnrollmentScreen());
                 Navigator.pop(context);
               },

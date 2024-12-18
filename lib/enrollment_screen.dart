@@ -23,9 +23,7 @@ class EnrollmentScreen extends StatelessWidget {
                 ),
               ),
               child: const Padding(
-                padding: EdgeInsets.only(
-                    bottom:
-                        8.0), // Add bottom padding to separate text from border
+                padding: EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   "Enrollment Page",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36),
@@ -183,7 +181,7 @@ class EnrollmentScreen extends StatelessWidget {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                           },
                           child: Text(
                             "Submit",
