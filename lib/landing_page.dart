@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:student_enrollment/home_screen.dart';
+import 'package:student_enrollment/home/view/home_screen.dart';
 import 'package:student_enrollment/pages.dart';
 
 class LandingPage extends StatefulWidget {
