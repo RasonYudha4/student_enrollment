@@ -3,6 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:modal_progress_hud_alt/modal_progress_hud_alt.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:student_enrollment/model/user.dart';
 
 //code for designing the UI of our text field where the user writes his email id or password
 
@@ -12,6 +14,8 @@ const kTextFieldDecoration = InputDecoration(
 );
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -127,6 +131,11 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Check if the user is not null
                     if (userCredential.user != null) {
+                      String userId =
+                          userCredential.user!.uid; // Get the user ID
+                      String email =
+                          userCredential.user!.email!; // Get the user email
+                      context.read<UserModel>().setUserData(userId, email);
                       Navigator.pushNamed(context, '/home');
                     }
                   } catch (e) {
@@ -153,14 +162,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Center(
                 child: RichText(
                   text: TextSpan(
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: "Don't have an account yet? ",
                         style: TextStyle(
                           color: Colors.white,
@@ -169,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextSpan(
                         text: "Sign up",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.blue,
                           fontSize: 16,
                           decoration: TextDecoration.underline,

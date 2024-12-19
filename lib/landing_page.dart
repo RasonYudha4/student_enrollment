@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:student_enrollment/home/view/home_screen.dart';
+import 'package:student_enrollment/model/user.dart';
 import 'package:student_enrollment/pages.dart';
 
 class LandingPage extends StatefulWidget {
@@ -20,6 +22,8 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = context.watch<UserModel>().userId; // Access user ID
+    final email = context.watch<UserModel>().email;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

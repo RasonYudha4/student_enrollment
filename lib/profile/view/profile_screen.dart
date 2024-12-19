@@ -1,120 +1,153 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:student_enrollment/enrollment/enrollment/enrollment_bloc.dart';
+import 'package:student_enrollment/enrollment/package/package_bloc.dart';
+import 'package:student_enrollment/model/user.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   static Page<void> page() => const MaterialPage<void>(child: ProfileScreen());
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the userId from UserModel
+    final userId = context.read<UserModel>().userId;
+    // Dispatch the GetEnrollment event with the userId
+    context.read<EnrollmentBloc>().add(GetEnrollment(userId!));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(15),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              // height: ,
-              width: double.infinity,
-              // decoration: BoxDecoration(
-              //     borderRadius: BorderRadius.circular(20), color: Colors.grey),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 80,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Rason Yudha",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      "rason.nugraha@student.president.ac.id",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      "001202300111",
-                      style: TextStyle(fontSize: 18),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              height: 200,
-              width: double.infinity,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Package Taken",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          PackageCard(
-                            lecturer: "Cutifa Safitri",
-                            room: "A215",
-                            time: "07.30 - 09.45",
-                            title: "Artificial Intelligence",
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          PackageCard(
-                            lecturer: "Cutifa Safitri",
-                            room: "A215",
-                            time: "07.30 - 09.45",
-                            title: "Artificial Intelligence",
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          PackageCard(
-                            lecturer: "Cutifa Safitri",
-                            room: "A215",
-                            time: "07.30 - 09.45",
-                            title: "Artificial Intelligence",
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                        ],
+    final userId = context.watch<UserModel>().userId;
+    final email = context.watch<UserModel>().email;
+    return BlocListener<EnrollmentBloc, EnrollmentState>(
+      listener: (context, state) {
+        if (state is EnrollmentFetchedSuccessfully) {
+          // Extract package IDs from the enrollment
+          List<String> packageIds = state.enrollment.packageId;
+
+          // Dispatch the GetPackageByUser Id event with the userId and packageIds
+          context.read<PackageBloc>().add(GetPackageByUserId(userId));
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.all(15),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircleAvatar(
+                        radius: 80,
                       ),
-                    )
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text(
+                        "Rason Yudha",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        email!,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        userId!,
+                        style: const TextStyle(fontSize: 18),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            ContactButton(),
-            LanguageButton(),
-            LogoutButton(),
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              const SizedBox(
+                height: 200,
+                width: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Package Taken",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 18),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      PackageList()
+                    ],
+                  ),
+                ),
+              ),
+              const ContactButton(),
+              const LanguageButton(),
+              const LogoutButton(),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class PackageList extends StatelessWidget {
+  const PackageList({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PackageBloc, PackageState>(
+      builder: (context, state) {
+        if (state is PackageLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else if (state is PackageLoaded) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: state.packages.map((package) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: PackageCard(
+                    lecturer: package.lecturer,
+                    room: package.room,
+                    time: package.schedule,
+                    title: package.title,
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        } else if (state is PackageError) {
+          return const Text("Fetch error");
+        }
+        return Container();
+      },
     );
   }
 }
@@ -138,28 +171,29 @@ class PackageCard extends StatelessWidget {
       height: 130,
       width: 280,
       decoration: BoxDecoration(
-          color: Color(0xFF283F61), borderRadius: BorderRadius.circular(10)),
+          color: const Color(0xFF283F61),
+          borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   border: Border(bottom: BorderSide(color: Colors.white))),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: Colors.white),
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -170,17 +204,17 @@ class PackageCard extends StatelessWidget {
                   children: [
                     Text(
                       lecturer,
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                     Text(
                       time,
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
                 Text(
                   room,
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold),
@@ -204,10 +238,10 @@ class ContactButton extends StatelessWidget {
       child: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             border:
                 Border(bottom: BorderSide(color: Colors.white, width: 0.5))),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
@@ -216,10 +250,10 @@ class ContactButton extends StatelessWidget {
                   Icons.email_outlined,
                   color: Colors.black,
                 ),
-                const SizedBox(
+                SizedBox(
                   width: 20,
                 ),
-                const Text(
+                Text(
                   "Contact Us",
                   style: TextStyle(fontSize: 18, color: Colors.black),
                 )
@@ -247,10 +281,10 @@ class LanguageButton extends StatelessWidget {
       child: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             border:
                 Border(bottom: BorderSide(color: Colors.white, width: 0.5))),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
@@ -259,10 +293,10 @@ class LanguageButton extends StatelessWidget {
                   Icons.language,
                   color: Colors.black,
                 ),
-                const SizedBox(
+                SizedBox(
                   width: 20,
                 ),
-                const Text(
+                Text(
                   "Change Language",
                   style: TextStyle(fontSize: 18, color: Colors.black),
                 )
@@ -295,10 +329,10 @@ class LogoutButton extends StatelessWidget {
       child: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             border:
                 Border(bottom: BorderSide(color: Colors.white, width: 0.5))),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
@@ -307,10 +341,10 @@ class LogoutButton extends StatelessWidget {
                   Icons.logout_outlined,
                   color: Colors.black,
                 ),
-                const SizedBox(
+                SizedBox(
                   width: 20,
                 ),
-                const Text(
+                Text(
                   "Log Out",
                   style: TextStyle(fontSize: 18, color: Colors.black),
                 )
